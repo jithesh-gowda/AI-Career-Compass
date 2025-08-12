@@ -1,0 +1,480 @@
+
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Book,
+  GraduationCap,
+  Briefcase,
+  TrendingUp,
+  Bot,
+  BrainCircuit,
+  FileText,
+  BarChart3,
+  Users,
+  LogOut,
+  User,
+  Mail,
+  Phone,
+  Linkedin,
+  Github,
+  Calendar,
+  Pencil,
+} from "lucide-react";
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+
+export default function Home() {
+  const [year, setYear] = React.useState<number | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [currentUser, setCurrentUser] = React.useState<any>(null);
+  const [showLearnMore, setShowLearnMore] = React.useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  React.useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
+    if (user && user.email) {
+        setIsAuthenticated(true);
+        setCurrentUser(user);
+        // Redirect to personal-information page if not completed
+        if (!user.personalInfoCompleted) {
+          router.push('/personal-information');
+        }
+    } else {
+        setIsAuthenticated(false);
+    }
+    setYear(new Date().getFullYear());
+  }, [router]);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("currentUser");
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    router.push("/"); // Refresh the page to reflect signed-out state
+  };
+
+
+  return (
+    <div className="flex flex-col min-h-[100dvh] bg-background">
+       <Dialog open={!isAuthenticated} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-[425px]" hideCloseButton={true}>
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl font-headline">Welcome to Career Compass AI</DialogTitle>
+            <DialogDescription className="text-center">
+              Please sign in or create an account to continue.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4">
+            <Link href="/signin" passHref>
+                <Button className="w-full">Sign In</Button>
+            </Link>
+            <Link href="/signup" passHref>
+                <Button variant="outline" className="w-full">Sign Up</Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-screen-xl items-center justify-between">
+          <Link href="#" className="flex items-center gap-2" prefetch={false}>
+            <Bot className="h-6 w-6 text-primary" />
+            <span className="font-bold font-headline text-lg">
+               Career Compass AI
+            </span>
+          </Link>
+           <nav className="flex items-center gap-4">
+            {isAuthenticated && currentUser ? (
+             <Dialog>
+              <div className="flex items-center gap-4">
+                  <DialogTrigger asChild>
+                    <div className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-muted/50 transition-colors">
+                        <User className="h-5 w-5 text-muted-foreground" />
+                        <span className="font-medium">{currentUser.name}</span>
+                    </div>
+                  </DialogTrigger>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-headline">{currentUser.fullName}</DialogTitle>
+                  <DialogDescription>
+                    {currentUser.professionalTitle || "Your Profile"}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="flex items-center gap-3">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{currentUser.email}</span>
+                    </div>
+                     {currentUser.phone && (
+                        <div className="flex items-center gap-3">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{currentUser.phone}</span>
+                        </div>
+                     )}
+                     {currentUser.dob && (
+                        <div className="flex items-center gap-3">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{format(new Date(currentUser.dob), "PPP")}</span>
+                        </div>
+                     )}
+                     {currentUser.linkedin && (
+                        <div className="flex items-center gap-3">
+                            <Linkedin className="h-4 w-4 text-muted-foreground" />
+                            <a href={currentUser.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate">{currentUser.linkedin}</a>
+                        </div>
+                     )}
+                     {currentUser.github && (
+                        <div className="flex items-center gap-3">
+                            <Github className="h-4 w-4 text-muted-foreground" />
+                             <a href={currentUser.github} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate">{currentUser.github}</a>
+                        </div>
+                     )}
+                </div>
+                 <DialogFooter>
+                    <Link href="/personal-information" passHref>
+                        <Button variant="outline">
+                           <Pencil className="mr-2 h-4 w-4" /> Edit Profile
+                        </Button>
+                    </Link>
+                 </DialogFooter>
+              </DialogContent>
+             </Dialog>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link href="/signin" passHref>
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
+                <Link href="/signup" passHref>
+                  <Button>
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </nav>
+        </div>
+      </header>
+      <main className="flex-1">
+        <section className="relative w-full h-screen bg-cover bg-center bg-no-repeat" style={{backgroundImage: "url('/photo/hero-image.png')"}}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative container h-full flex flex-col items-center justify-center text-center text-white space-y-6 pt-16">
+            <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl xl:text-7xl/none text-shadow-lg">
+              {isAuthenticated && currentUser ? `Welcome, ${currentUser.name}! ` : ''}Navigate Your Future with AI
+            </h1>
+            <p className="max-w-[600px] md:text-xl text-shadow">
+              Career Compass AI provides personalized guidance for students
+              and professionals. Discover your path, build a winning
+              resume, and unlock your potential.
+            </p>
+            <div className="flex flex-col gap-2 min-[400px]:flex-row">
+              <Link
+                href="#start"
+                className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              >
+                Find Your Path
+              </Link>
+              <Dialog open={showLearnMore} onOpenChange={setShowLearnMore}>
+                <DialogTrigger asChild>
+                    <Button variant="outline" size="lg" className="bg-transparent text-white border-white hover:bg-white hover:text-black">
+                        Learn More
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-headline">About Career Compass AI</DialogTitle>
+                    <DialogDescription className="text-left pt-2">
+                      Career Compass AI is a comprehensive platform designed to guide you through every stage of your academic and professional journey. Whether you're a student making crucial career decisions or a professional aiming to advance, our AI-powered tools provide the personalized support you need to succeed.
+                      <br /><br />
+                      <strong className="font-semibold text-foreground">For Students:</strong> We help 10th-grade students choose the right academic stream (Science, Commerce, or Arts) based on their marks and interests. For 12th graders, we recommend suitable degree courses and career paths, ensuring a smooth transition to higher education.
+                      <br /><br />
+                      <strong className="font-semibold text-foreground">For Professionals:</strong> Our platform assists undergraduates and professionals in preparing for the job market. From building an ATS-friendly resume with our AI Resume Reviewer to exploring career progression maps and identifying upskilling opportunities, we empower you to take the next step in your career with confidence.
+                      <br /><br />
+                      With a suite of tools including an AI Career Advisor and a 24/7 AI Career Counselor chatbot, Career Compass AI is your trusted partner in navigating the complexities of the modern career landscape.
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </section>
+
+        <section id="start" className="w-full py-12 md:py-24 lg:py-32 bg-muted/20">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline text-foreground">
+                  How can we help you today?
+                </h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Select your current stage to get a personalized experience
+                  tailored to your needs.
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 sm:grid-cols-2 lg:grid-cols-4">
+              <Card className="transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                <CardHeader className="flex flex-col items-center text-center p-6">
+                  <div className="mb-4 rounded-full bg-primary/10 p-4">
+                    <Book className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="font-headline text-xl">
+                    10th Grader
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center p-6 pt-0">
+                  <CardDescription>
+                    Explore streams and subjects for your future.
+                  </CardDescription>
+                  <Link href="/grade10" passHref>
+                    <Button variant="outline" className="mt-4">
+                      Choose Path
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+              <Card className="transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                <CardHeader className="flex flex-col items-center text-center p-6">
+                  <div className="mb-4 rounded-full bg-primary/10 p-4">
+                    <GraduationCap className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="font-headline text-xl">
+                    12th Grader
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center p-6 pt-0">
+                  <CardDescription>
+                    Find your college, major and career options.
+                  </CardDescription>
+                   <Link href="/grade12" passHref>
+                    <Button variant="outline" className="mt-4">
+                      Find Major
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+              <Card className="transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                <CardHeader className="flex flex-col items-center text-center p-6">
+                  <div className="mb-4 rounded-full bg-primary/10 p-4">
+                    <Briefcase className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="font-headline text-xl">
+                    Undergraduate
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center p-6 pt-0">
+                  <CardDescription>
+                    Prepare for your first job and internships.
+                  </CardDescription>
+                  <Link href="/undergraduate" passHref>
+                    <Button variant="outline" className="mt-4">
+                      Get Job Ready
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+              <Card className="transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                <CardHeader className="flex flex-col items-center text-center p-6">
+                  <div className="mb-4 rounded-full bg-primary/10 p-4">
+                    <TrendingUp className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="font-headline text-xl">
+                    Professional
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center p-6 pt-0">
+                  <CardDescription>
+                    Advance your career and find new opportunities.
+                  </CardDescription>
+                  <Link href="/professional" passHref>
+                    <Button variant="outline" className="mt-4">
+                      Level Up
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight font-headline">
+                Everything You Need To Succeed
+              </h2>
+              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Our platform is packed with AI-powered tools to help you at
+                every stage of your career journey.
+              </p>
+            </div>
+            <div className="mx-auto grid grid-cols-1 gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
+              <Link href="/ai-career-advisor" className="flex flex-col items-center space-y-2 text-center transition-transform duration-300 hover:scale-105">
+                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
+                  <BrainCircuit className="text-primary h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold font-headline">
+                  AI Career Advisor
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Intelligent career path mapping.
+                </p>
+              </Link>
+              <Link href="/career-dashboard" className="flex flex-col items-center space-y-2 text-center transition-transform duration-300 hover:scale-105">
+                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
+                  <BarChart3 className="text-primary h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold font-headline">
+                  Career Dashboard
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Job trends and salary insights.
+                </p>
+              </Link>
+              <Link href="/career-counselor" className="flex flex-col items-center space-y-2 text-center transition-transform duration-300 hover:scale-105">
+                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
+                  <Users className="text-primary h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold font-headline">
+                  AI Career Counselor
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  24/7 AI-powered chatbot.
+                </p>
+              </Link>
+              <Link href="/resume-reviewer" className="flex flex-col items-center space-y-2 text-center transition-transform duration-300 hover:scale-105">
+                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
+                  <FileText className="text-primary h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold font-headline">
+                  AI Resume Reviewer
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  ATS-friendly resume analysis.
+                </p>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+        <p className="text-xs text-muted-foreground">
+          &copy; {year} Career Compass AI. All rights
+          reserved.
+        </p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="link" className="text-xs p-0 h-auto text-muted-foreground hover:text-primary">
+                Terms of Service
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Terms of Service</DialogTitle>
+                <DialogDescription>
+                  Last updated: {format(new Date(), "PPP")}
+                </DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="h-96 pr-6">
+                <div className="prose prose-sm dark:prose-invert">
+                  <p>Welcome to Career Compass AI. These terms and conditions outline the rules and regulations for the use of our website.</p>
+                  <p>By accessing this website we assume you accept these terms and conditions. Do not continue to use Career Compass AI if you do not agree to take all of the terms and conditions stated on this page.</p>
+                  
+                  <h3 className="text-lg font-semibold mt-4">1. License</h3>
+                  <p>Unless otherwise stated, Career Compass AI and/or its licensors own the intellectual property rights for all material on Career Compass AI. All intellectual property rights are reserved. You may access this from Career Compass AI for your own personal use subjected to restrictions set in these terms and conditions.</p>
+                  <p>You must not:</p>
+                  <ul className="list-disc pl-5">
+                    <li>Republish material from Career Compass AI</li>
+                    <li>Sell, rent or sub-license material from Career Compass AI</li>
+                    <li>Reproduce, duplicate or copy material from Career Compass AI</li>
+                    <li>Redistribute content from Career Compass AI</li>
+                  </ul>
+                  
+                  <h3 className="text-lg font-semibold mt-4">2. User-Generated Content</h3>
+                  <p>Parts of this website offer an opportunity for users to post and exchange opinions and information. Career Compass AI does not filter, edit, publish or review Comments prior to their presence on the website. Comments do not reflect the views and opinions of Career Compass AI, its agents and/or affiliates. Comments reflect the views and opinions of the person who post their views and opinions.</p>
+                  
+                  <h3 className="text-lg font-semibold mt-4">3. Disclaimer</h3>
+                  <p>The information provided by Career Compass AI is for general guidance on matters of interest only. Even if the Company takes every precaution to insure that the content of the Service is both current and accurate, errors can occur. Plus, given the changing nature of laws, rules and regulations, there may be delays, omissions or inaccuracies in the information contained on the Service.</p>
+                </div>
+              </ScrollArea>
+              <DialogFooter>
+                <DialogTrigger asChild>
+                  <Button type="button">Close</Button>
+                </DialogTrigger>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="link" className="text-xs p-0 h-auto text-muted-foreground hover:text-primary">
+                Privacy Policy
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Privacy Policy</DialogTitle>
+                 <DialogDescription>
+                  Last updated: {format(new Date(), "PPP")}
+                </DialogDescription>
+              </DialogHeader>
+               <ScrollArea className="h-96 pr-6">
+                 <div className="prose prose-sm dark:prose-invert">
+                  <p>Your privacy is important to us. It is Career Compass AI's policy to respect your privacy regarding any information we may collect from you across our website.</p>
+                  
+                  <h3 className="text-lg font-semibold mt-4">1. Information We Collect</h3>
+                  <p>We only ask for personal information when we truly need it to provide a service to you. We collect it by fair and lawful means, with your knowledge and consent. We also let you know why we’re collecting it and how it will be used. The personal information that you are asked to provide, and the reasons why you are asked to provide it, will be made clear to you at the point we ask you to provide your personal information.</p>
+                  
+                  <h3 className="text-lg font-semibold mt-4">2. Use of Your Information</h3>
+                  <p>We may use the information we collect in various ways, including to:</p>
+                   <ul className="list-disc pl-5">
+                    <li>Provide, operate, and maintain our website</li>
+                    <li>Improve, personalize, and expand our website</li>
+                    <li>Understand and analyze how you use our website</li>
+                    <li>Develop new products, services, features, and functionality</li>
+                    <li>Communicate with you, either directly or through one of our partners</li>
+                  </ul>
+
+                  <h3 className="text-lg font-semibold mt-4">3. Data Storage</h3>
+                   <p>For this prototype application, all user data, including your name, email, and any details you provide for resume building or career advice, is stored in your web browser's local storage. This means your data stays on your device and is not transmitted to a central server or database. If you clear your browser data or use a different device, this information will not be available.</p>
+                </div>
+              </ScrollArea>
+              <DialogFooter>
+                <DialogTrigger asChild>
+                  <Button type="button">Close</Button>
+                </DialogTrigger>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </nav>
+      </footer>
+    </div>
+  );
+}
